@@ -4,7 +4,7 @@ namespace Scheduler\Controller;
 /**
  * @author Iuli Dercaci <iuli.dercaci@gmail.com>
  */
-class Controller
+abstract class Controller
 {
 	protected $templateDir = '../views/';
 

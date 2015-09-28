@@ -1,9 +1,6 @@
 <?php
 namespace Scheduler\Controller;
 
-/**
- * 
- */
 class Index
 {
 	
