@@ -2,24 +2,38 @@
 /**
  * @author Iuli Dercaci <iuli.dercaci@gmail.com>
  */
-echo 'test';
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 include_once '../lib/SplClassLoader.php';
-$classLoader = new SplClassLoader('Scheduler', '../app');
+$classLoader = new \SplClassLoader('Scheduler', '../app');
 $classLoader->register();
 
 $controller = 'Index';
+$action = 'index';
 if (!empty(trim($_SERVER['REQUEST_URI'], '/'))) {
-	$name = trim($_SERVER['REQUEST_URI'], ' \/');
-	$controller = ucfirst(strtolower($name));
+	$name = trim($_SERVER['REQUEST_URI'], ' /');
+    if (strripos($name, '/')) {
+        list($controller, $action) = explode('/', $name, 2);
+        if (strlen(trim($action)) == 0){
+            $action = 'index';
+        }
+    }
+	$controller = ucfirst(strtolower($controller));
 } 
 $controller = sprintf('\Scheduler\Controller\%s', $controller);
 
-try {
-	$controller = new $controller;
-} catch (Exception $e) {
-	var_dump($e->getMessage());
+if (is_file('..'.DIRECTORY_SEPARATOR.'app'.str_replace('\\',DIRECTORY_SEPARATOR,$controller ).'.php')) {
+    $controller = new $controller;
+    $file_db = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'db' . DIRECTORY_SEPARATOR . 'db.sqlite';
+    $db = new PDO('sqlite:'. $file_db);
+    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    var_dump($db);
+    exit();
+} else {
+    echo $controller;
+    echo '<br>\Scheduler\Controller\Error';
+    $controller = new \Scheduler\Controller\Error('Страница не найдена', '404');
 }
-var_dump($controller);
+$controller->{$action}();
+$controller->render();
